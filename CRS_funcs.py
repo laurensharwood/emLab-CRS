@@ -287,12 +287,12 @@ def AT_stats(input_csv, plotID, output_csv=False, seasonal_csv=False, plot=True)
         Y_axis_min = stDev18["ATdiff"].min()-50        
         full_fig.add_trace(go.Bar(name="CR", x=["2017-01-01", "2018-01-01", "2019-01-01", "2020-01-01"], y=[800, 800, 800, 800], marker=dict(color=px.colors.qualitative.Antique[1]), opacity= 0.3, xperiod="M3", xperiodalignment="end", xhoverformat="Q%q", hovertemplate="crop residue visibility window"))
         full_fig.add_trace(go.Bar(name="CC", x=["2016-10-01", "2017-10-01", "2018-10-01", "2019-10-01"], y=[800, 800, 800, 800], marker=dict(color=px.colors.qualitative.Antique[6]), opacity= 0.3, xperiod="M3", xperiodalignment="end", xhoverformat="Q%q", hovertemplate="cover crop visibility window"))
-        full_fig.show()
         full_fig.update_xaxes(rangeslider_visible=True, 
                          rangeselector=dict(buttons=list([dict(count=6, label="6m", step="month", stepmode="backward"),
                                                           dict(count=1, label="1y", step="year", stepmode="backward"), 
                                                           dict(count=2, label="2y", step="year", stepmode="backward"), 
                                                           dict(step="all")]) ))        
+        full_fig.show()
 
 def OLD_AT_stats(input_csv, plotID, output_csv=False, plot=True):
     merged_csv = pd.read_csv(input_csv, header=0, index_col=0, parse_dates=True)
