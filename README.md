@@ -1,31 +1,29 @@
-# Conda environment with environment.yml
+# CRS conda environment with environment.yml
 
-[![Binder](http://mybinder.org/badge_logo.svg)](http://mybinder.org/v2/gh/binder-examples/conda_environment/master?filepath=index.ipynb)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/laurensharwood/CRS/master?labpath=CRS_report.ipynb)
 
-A Binder-compatible repo with an `environment.yml` file.
 
-Access this Binder by clicking the blue badge above or at the following URL:
+https://mybinder.org/v2/gh/laurensharwood/CRS/master?labpath=CRS_report.ipynb
 
-http://mybinder.org/v2/gh/binder-examples/conda_environment/master?filepath=index.ipynb
 
-## Notes
-The `environment.yml` file should list all Python libraries on which your notebooks
-depend, specified as though they were created using the following `conda` commands:
+# 2016-2019 time series of vegetation indices to identify cover crops (CC) and crop residue (CR) on ASA plots (treatment) vs Test plots (control):  
+- Vegetation Indices: maximize separation of features of interest. Broadband vs narrowband.  
+- Limited to indices using wavelengths/bands covered by Sentinel AND Landsat (can't use Sentinel's red-edge bands).  
 
-```
-conda activate example-environment
-conda env export --from-history -f environment.yml
-```
+## <b>Cover crops:</b> identify CC on ASA plots (with standing CR) from Test plots without CC (with grazed CR)  
+- <b>Temporal window:</b> NOV to FEB - after postrera harvest, CC is planted and dies off by February in dry years (can last as long as May?)  
+- <b>Spectral window:</b> choose bands-> indices measuring green/live/photosynthetically active vegetation vs brown/dead/non-photosynthetically active vegetation  
+1) <b>Enhanced Vegetation Index 2 (EVI2)</b> = 2.5 * ( NIR - RED) / ( NIR + (2.4 * RED + 1.0 )    
+2) <b>Green-Chlorophyll Vegetation Index (GCVI)</b> = (NIR – GREEN) / (NIR + GREEN)  
+3) NBR
 
-Note that the only libraries available to you will be the ones specified in
-the `environment.yml`, so be sure to include everything that you need! 
+<b> ASA should have higher EVI & GCVI values than Test plots from NOV to FEB </b>
 
-Also note that if you skip the `--from-history`, conda may include OS-specific
-packages in `environment.yml`, which you would have to manually prune from
-`environment.yml`.  For example, confirmed macOS-specific packages that should
-be removed are:
 
-* libcxxabi=4.0.1
-* appnope=0.1.0
-* libgfortran=3.0.1
-* libcxx=4.0.1
+## <b>Crop residue:</b> differentiate ASA plots with standing crop residue from Test plots with grazed residue (leaving soil)  
+- <b>Temporal window:</b> FEB to MAY - CR is left on both Test and ASA plots. Grazing occurs on Test, so once residue has been grazed on Test & CC dies on ASA around Feb, Test plot should have soil and ASA plot should have standing residue  
+- <b>Spectral window:</b> soil and dead/dry veg look similar in visible and NIR parts of the spectrum, but lignin and cellulose in standing residue absorb SWIR2 light  
+1) <b>Normalized Difference Tillage Index (NDTI)</b> = (SWIR1-SWIR2) / (SWIR1+SWIR2) First, the most prominent spectral difference between NPV and soil is the cellulose absorption feature in SWIR 2 wavelengths.   
+2) <b>Normalized Burn Ratio (NBR)</b> = (SWIR2-NIR1) / (SWIR2+NIR) soil should have lower NBR than NPV  
+
+<b> ASA should have higher NDTI & NBR values than Test plots from FEB to MAY </b>
