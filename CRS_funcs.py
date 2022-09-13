@@ -18,6 +18,7 @@ from ipyleaflet import *
 from ipywidgets import *
 import folium
 import plotly.graph_objects as go
+# import voila
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -65,35 +66,31 @@ def temporal_profile(grid, index_list):
         fig.add_trace(go.Bar(name="CC", x=["2016-12-01", "2017-12-01", "2018-12-01", "2019-12-01"], y=[Y_axis_limit, Y_axis_limit, Y_axis_limit, Y_axis_limit], marker=dict(color=px.colors.qualitative.Antique[6]), opacity= 0.3, xperiod="M1", xperiodalignment="middle", xhoverformat="Q%q", hovertemplate="cover crop visibility window"))
         fig.add_trace(go.Bar(name="CR", x=["2017-03-01", "2018-03-01", "2019-03-01", "2020-03-01"], y=[Y_axis_limit, Y_axis_limit, Y_axis_limit, Y_axis_limit], marker=dict(color=px.colors.qualitative.Antique[1]), opacity= 0.3, xperiod="M1", xperiodalignment="middle", xhoverformat="Q%q", hovertemplate="crop residue visibility window"))
         fig.show()
-      
 
-
-    
-    
-    
-def border(feature):
-    if feature["properties"]["Parcela"] == "ASA":
-        return 1
-    elif feature["properties"]["Parcela"] == "Testigo":
-        return 3
-    
-    
-def create_marker(row):
-    loc = row['geometry.coordinates']
-    name = row['properties.ID_Prod']
-    colr = row['properties.color']
-    lat_lon = (loc[1], loc[0])
-    return CircleMarker(location=lat_lon,
-                    draggable=False,
-                    title=name,
-                    label=name,
-                    radius=1,
-                    weight=5,
-                    color=colr,
-                    fillColor="black")
 
 
 def display_plots(grid, index_list):
+    # mapping functions - Testigo dashed plot border / ASA plot solid
+    def border(feature):
+        if feature["properties"]["Parcela"] == "ASA":
+            return 1
+        elif feature["properties"]["Parcela"] == "Testigo":
+            return 3
+    # mapping function - plot centroids 
+    def create_marker(row):
+        loc = row['geometry.coordinates']
+        name = row['properties.ID_Prod']
+        colr = row['properties.color']
+        lat_lon = (loc[1], loc[0])
+        return CircleMarker(location=lat_lon,
+                        draggable=False,
+                        title=name,
+                        label=name,
+                        radius=1,
+                        weight=5,
+                        color=colr,
+                        fillColor="black")
+
     with open("NI_ES_grid_centroids.geojson") as gc:
         grid_center = json.load(gc)
         grid_center_df = pd.json_normalize(grid_center['features'])
@@ -150,15 +147,14 @@ def display_plots(grid, index_list):
     practices_df = pd.read_csv(practices_csv, dtype=str) 
     grid_practice_df = practices_df.loc[practices_df['Grid'] == str(grid)[2:]]
     practices = pd.pivot(grid_practice_df, index=['ID_Prod','Parcela', 'Nom.Cob'], columns=['Temporada','Ano'], values=['Cultivo'])
-    print(grid_practice_df)
     cols = practices.columns.tolist()
-    print(len(cols))
     practice = practices[[cols[1], cols[0], cols[3], cols[2], cols[5], cols[4], cols[7], cols[6]]]
     display(practice)
     ## display time series
     temporal_profile_for_practices(grid, index_list)
     ## display map
     return m
+
 
 def aggregate_plots(input_dir, index):
     index_merge = [ind for ind in sorted(os.listdir(input_dir)) if str(index) in ind] # list of filenames in the input directory that contain the index string
@@ -292,7 +288,11 @@ def AT_stats(input_csv, plotID, output_csv=False, seasonal_csv=False, plot=True)
         full_fig.add_trace(go.Bar(name="CR", x=["2017-01-01", "2018-01-01", "2019-01-01", "2020-01-01"], y=[800, 800, 800, 800], marker=dict(color=px.colors.qualitative.Antique[1]), opacity= 0.3, xperiod="M3", xperiodalignment="end", xhoverformat="Q%q", hovertemplate="crop residue visibility window"))
         full_fig.add_trace(go.Bar(name="CC", x=["2016-10-01", "2017-10-01", "2018-10-01", "2019-10-01"], y=[800, 800, 800, 800], marker=dict(color=px.colors.qualitative.Antique[6]), opacity= 0.3, xperiod="M3", xperiodalignment="end", xhoverformat="Q%q", hovertemplate="cover crop visibility window"))
         full_fig.show()
-        
+        full_fig.update_xaxes(rangeslider_visible=True, 
+                         rangeselector=dict(buttons=list([dict(count=6, label="6m", step="month", stepmode="backward"),
+                                                          dict(count=1, label="1y", step="year", stepmode="backward"), 
+                                                          dict(count=2, label="2y", step="year", stepmode="backward"), 
+                                                          dict(step="all")]) ))        
 
 def OLD_AT_stats(input_csv, plotID, output_csv=False, plot=True):
     merged_csv = pd.read_csv(input_csv, header=0, index_col=0, parse_dates=True)
