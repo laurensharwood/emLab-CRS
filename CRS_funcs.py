@@ -151,16 +151,13 @@ def display_plots(grid, index_list):
     grid_practice_df = practices_df.loc[practices_df['Grid'] == str(grid)]
     practices = pd.pivot(grid_practice_df, index=['ID_Prod','Parcela', 'Nom.Cob'], columns=['Temporada','Ano'], values=['Cultivo'])
     cols = practices.columns.tolist()
-    practices = practices[[cols[1], cols[0], cols[3], cols[2], cols[5], cols[4], cols[7], cols[6]]]
-    display(practices)
-
-    ## display EVI2 time series
+    print(len(cols))
+    practice = practices[[cols[1], cols[0], cols[3], cols[2], cols[5], cols[4], cols[7], cols[6]]]
+    display(practice)
+    ## display time series
     temporal_profile_for_practices(grid, index_list)
-    
     ## display map
     return m
-
-
 
 def aggregate_plots(input_dir, index):
     index_merge = [ind for ind in sorted(os.listdir(input_dir)) if str(index) in ind] # list of filenames in the input directory that contain the index string
