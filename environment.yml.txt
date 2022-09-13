@@ -1,0 +1,24 @@
+name: leaflet
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - ipyleaflet
+  - plotly
+  - pandas
+  - matplotlib
+  - ipywidgets
+  - bqplot
+  - jupyter_contrib_nbextensions
+  - ipympl
+  - jupyterlab
+  - xarray
+  - fiona
+  - geopandas
+  - shapely
+  - pytorch
+  - voila
+  - jinja2
+  - nodejs
+  - nbclient
+prefix: C:\Users\Lauren\anaconda3\envs\leaflet
