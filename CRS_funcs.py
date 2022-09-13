@@ -148,8 +148,9 @@ def display_plots(grid, index_list):
     ## display practice database
     practices_csv = "time_series/practices_NI_ES.csv"
     practices_df = pd.read_csv(practices_csv, dtype=str) 
-    grid_practice_df = practices_df.loc[practices_df['Grid'] == str(grid)]
+    grid_practice_df = practices_df.loc[practices_df['Grid'] == str(grid)[2:]]
     practices = pd.pivot(grid_practice_df, index=['ID_Prod','Parcela', 'Nom.Cob'], columns=['Temporada','Ano'], values=['Cultivo'])
+    print(grid_practice_df)
     cols = practices.columns.tolist()
     print(len(cols))
     practice = practices[[cols[1], cols[0], cols[3], cols[2], cols[5], cols[4], cols[7], cols[6]]]
