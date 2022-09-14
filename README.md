@@ -2,6 +2,7 @@
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/laurensharwood/CRS/master?labpath=CRS_report.ipynb)
 
+- right-click to keep VI key open
 
 https://mybinder.org/v2/gh/laurensharwood/CRS/master?labpath=CRS_report.ipynb
 
