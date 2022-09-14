@@ -4,7 +4,6 @@
 
 https://mybinder.org/v2/gh/laurensharwood/CRS/master?labpath=CRS_report.ipynb
 
-
 # 2016-2019 time series of vegetation indices to identify cover crops (CC) and crop residue (CR) on ASA plots (treatment) vs Test plots (control):  
 - Vegetation Indices: maximize separation of features of interest. Broadband vs narrowband.  
 - Limited to indices using wavelengths/bands covered by Sentinel AND Landsat (can't use Sentinel's red-edge bands).  
