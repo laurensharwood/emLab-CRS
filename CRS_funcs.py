@@ -135,6 +135,13 @@ def display_plots(grid, index_list, practicedb=True):
             cols = practices.columns.tolist()
             practice = practices[[cols[1], cols[0], cols[3], cols[2], cols[4], cols[7], cols[5], cols[6]]]
             display(practice)
+        if str(grid)[2:] == "2550":
+            grid_practice_df.loc[len(grid_practice_df.index)] = ["NI_581", "2018", "1.Postrera", "Testigo", "None", "maíz-frijol-canavalia", "Si", "Si", "Si", "Si", "2550"] 
+            grid_practice_df.loc[len(grid_practice_df.index)] = ["NI_581", "2018", "1.Postrera", "ASA", "None", "maíz-frijol-canavalia", "Si", "Si", "Si", "Si", "2550"] 
+            practices = pd.pivot(grid_practice_df, index=['ID_Prod','Parcela', 'Nom.Cob'], columns=['Temporada','Ano'], values=['Cultivo'])
+            cols = practices.columns.tolist()
+            practice = practices[[cols[1], cols[0], cols[3], cols[2], cols[4], cols[7], cols[6], cols[5]]]
+            display(practice)
         else:
             practices = pd.pivot(grid_practice_df, index=['ID_Prod','Parcela', 'Nom.Cob'], columns=['Temporada','Ano'], values=['Cultivo'])
             cols = practices.columns.tolist()
