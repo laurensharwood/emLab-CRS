@@ -416,7 +416,7 @@ def AT_diff_SZN_barchart(input_csv):
     splitpath = input_csv.split('/')
     splitfile = splitpath[-1].split('_')
     TITL = splitfile[0].upper() + " Avg seasonal ASA-Test plot differences (grouped relative to seasonal SD of all NI plots)"
-    fig = px.bar(VIdff_count_list_CC_CR, x="Season", y="PLOTcount", title=TITL, hover_data=["FieldID","SZNcount"],  color="avgATdiff", color_discrete_sequence=[px.colors.diverging.RdYlBu[10],px.colors.diverging.RdYlBu[7], px.colors.diverging.RdYlBu[3], px.colors.diverging.RdYlBu[1]])
+    fig = px.bar(VIdff_count_list_CC_CR, x="Season", y="PLOTcount", title=TITL, hover_data=["FieldID","SZNcount"],  color="avgATdiff", color_discrete_sequence=[px.colors.diverging.RdYlBu[10], px.colors.diverging.RdYlBu[7], px.colors.diverging.RdYlBu[3], px.colors.diverging.RdYlBu[1]], category_orders={"avgATdiff": ["1: (A>T) avg seasonal A-T diff greater than +1SD", "2: (a>t)  avg seasonal A-T diff btwn 0 and +1SD", "3: (t>a) avg seasonal A-T diff btwn 0 and -1SD", "4: (T>A) avg seasonal A-T diff less than -1SD"], "Season": ["2016-COVER CROP", "2016-CROP RESIDUE", "2017-COVER CROP", "2017-CROP RESIDUE", "2018-COVER CROP", "2018-CROP RESIDUE", "2019-COVER CROP", "2019-CROP RESIDUE"]})
     fig.show()
     
 def AT_diff_barchart(input_csv):
