@@ -23,7 +23,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 
-
+##################
 
 def temporal_profile_for_practices(grid, index_list):
     for i in index_list:
@@ -47,29 +47,8 @@ def temporal_profile_for_practices(grid, index_list):
         fig.update(layout_yaxis_range = [Y_axis_min,Y_axis_limit])
         fig.show()
       
-        
-def all_temporal_profile(grid, index_list):
-    for i in index_list:
-        input_csv = "time_series/NI/" + grid + "_" + i + "_TimeSeries.csv"
-        df = pd.read_csv(input_csv, header=0, index_col=0, parse_dates=True)
-        Y_axis_limit = df["Value"].max()+50
-        Y_axis_min = df["Value"].min()-50
-        fig = px.line(df, x='Date', y='Value', title= i.upper() + ' Time Series (for plots in grid ' + grid + ")", 
-                      color='FieldID', 
-                      color_discrete_sequence=px.colors.qualitative.Dark2, # Bold, Vivid, Dark2, Pastel
-                      line_dash='Parcela')
-        fig.update_layout(xaxis_title='Date', yaxis_title='VI Value')
-        fig.update_xaxes(rangeslider_visible=True, 
-                         rangeselector=dict(buttons=list([dict(count=6, label="6m", step="month", stepmode="backward"),
-                                                          dict(count=1, label="1y", step="year", stepmode="backward"), 
-                                                          dict(count=2, label="2y", step="year", stepmode="backward"), 
-                                                          dict(step="all")]) ))
-        fig.add_trace(go.Bar(name="CC", x=["2016-12-01", "2017-12-01", "2018-12-01", "2019-12-01"], y=[Y_axis_limit, Y_axis_limit, Y_axis_limit, Y_axis_limit], marker=dict(color=px.colors.qualitative.Antique[6]), opacity= 0.3, xperiod="M1", xperiodalignment="middle", xhoverformat="Q%q", hovertemplate="cover crop visibility window"))
-        fig.add_trace(go.Bar(name="CR", x=["2017-03-01", "2018-03-01", "2019-03-01", "2020-03-01"], y=[Y_axis_limit, Y_axis_limit, Y_axis_limit, Y_axis_limit], marker=dict(color=px.colors.qualitative.Antique[1]), opacity= 0.3, xperiod="M1", xperiodalignment="middle", xhoverformat="Q%q", hovertemplate="crop residue visibility window"))
-        fig.show()
 
-
-
+    
 def display_plots(grid, index_list, practicedb=True):
     # mapping functions - Testigo dashed plot border / ASA plot solid
     def border(feature):
@@ -146,16 +125,29 @@ def display_plots(grid, index_list, practicedb=True):
         practices_csv = "time_series/practices_NI_ES.csv"
         practices_df = pd.read_csv(practices_csv, dtype=str) 
         grid_practice_df = practices_df.loc[practices_df['Grid'] == str(grid)[2:]]
-        practices = pd.pivot(grid_practice_df, index=['ID_Prod','Parcela', 'Nom.Cob'], columns=['Temporada','Ano'], values=['Cultivo'])
-        cols = practices.columns.tolist()
-        practice = practices[[cols[1], cols[0], cols[3], cols[2], cols[5], cols[4], cols[7], cols[6]]]
-        display(practice)
+        
+        if str(grid)[2:] == "2387":
+            grid_practice_df.loc[len(grid_practice_df.index)] = ["NI_258", "2018", "1.Postrera", "ASA", "None", "maíz-frijol-canavalia", "Si", "Si", "Si", "Si", "2387"] 
+            grid_practice_df.loc[len(grid_practice_df.index)] = ["NI_258", "2018", "1.Postrera", "Testigo", "None", "maíz-frijol-canavalia", "Si", "Si", "Si", "Si", "2387"] 
+            grid_practice_df.loc[len(grid_practice_df.index)] = ["NI_248", "2018", "1.Postrera", "ASA", "None", "maíz-frijol-canavalia", "Si", "Si", "Si", "Si", "2387"] 
+            grid_practice_df.loc[len(grid_practice_df.index)] = ["NI_248", "2018", "1.Postrera", "Testigo", "None", "maíz-frijol-canavalia", "Si", "Si", "Si", "Si", "2387"] 
+            practices = pd.pivot(grid_practice_df, index=['ID_Prod','Parcela', 'Nom.Cob'], columns=['Temporada','Ano'], values=['Cultivo'])
+            cols = practices.columns.tolist()
+            practice = practices[[cols[1], cols[0], cols[3], cols[2], cols[4], cols[7], cols[5], cols[6]]]
+            display(practice)
+        else:
+            practices = pd.pivot(grid_practice_df, index=['ID_Prod','Parcela', 'Nom.Cob'], columns=['Temporada','Ano'], values=['Cultivo'])
+            cols = practices.columns.tolist()
+            practice = practices[[cols[1], cols[0], cols[3], cols[2], cols[5], cols[4], cols[7], cols[6]]]
+            display(practice)
+
     if practicedb==False:
         pass
     ## display time series
     temporal_profile_for_practices(grid, index_list)
     ## display map
     return m
+
 
 
 def aggregate_plots(input_dir, index):
@@ -278,10 +270,10 @@ def AT_stats(input_csv, plotID, output_csv=False, seasonal_csv=False, plot=True)
         full_fig.add_trace(go.Scatter(x=mean16["Date"], y=upperB16, mode='lines', line=dict(color=px.colors.sequential.thermal[4],width =0.1), name=''))
         full_fig.add_trace(go.Scatter(x=mean16["Date"], y=mean16["ATdiff"], mode='lines', line=dict(color=px.colors.sequential.thermal[4]),fill='tonexty', name='2016 Mean'))
         full_fig.add_trace(go.Scatter(x=mean16["Date"], y=lowerB16, mode='lines', line=dict(color=px.colors.sequential.thermal[4],width =0.1), fill='tonexty',name='2016 SD'))
-        full_fig.add_trace(go.Scatter(x=plot16["Date"], y=plot16["ATdiff"], mode='lines', line=dict(color=px.colors.sequential.thermal[1],width =3.0), name=str(plotID) + " 2016 A-T diff"))
-        full_fig.add_trace(go.Scatter(x=plot17["Date"], y=plot17["ATdiff"], mode='lines', line=dict(color=px.colors.sequential.thermal[1],width =3.0), name=str(plotID) + " 2017 A-T diff"))
-        full_fig.add_trace(go.Scatter(x=plot18["Date"], y=plot18["ATdiff"], mode='lines', line=dict(color=px.colors.sequential.thermal[1],width =3.0), name=str(plotID) + " 2018 A-T diff"))
-        full_fig.add_trace(go.Scatter(x=plot19["Date"], y=plot19["ATdiff"], mode='lines', line=dict(color=px.colors.sequential.thermal[1],width =3.0), name=str(plotID) + " 2019 A-T diff"))
+        full_fig.add_trace(go.Scatter(x=plot16["Date"], y=plot16["ATdiff"], mode='lines', line=dict(color="black",width =3.0), name=str(plotID) + " 2016 A-T diff"))
+        full_fig.add_trace(go.Scatter(x=plot17["Date"], y=plot17["ATdiff"], mode='lines', line=dict(color="black",width =3.0), name=str(plotID) + " 2017 A-T diff"))
+        full_fig.add_trace(go.Scatter(x=plot18["Date"], y=plot18["ATdiff"], mode='lines', line=dict(color="black",width =3.0), name=str(plotID) + " 2018 A-T diff"))
+        full_fig.add_trace(go.Scatter(x=plot19["Date"], y=plot19["ATdiff"], mode='lines', line=dict(color="black",width =3.0), name=str(plotID) + " 2019 A-T diff"))
         splitpath = input_csv.split('/')
         splitfile = splitpath[-1].split('_')
         index = splitfile[0].upper()
@@ -296,110 +288,12 @@ def AT_stats(input_csv, plotID, output_csv=False, seasonal_csv=False, plot=True)
                                                           dict(count=2, label="2y", step="year", stepmode="backward"), 
                                                           dict(step="all")]) ))        
         full_fig.show()
-
-def OLD_AT_stats(input_csv, plotID, output_csv=False, plot=True):
-    merged_csv = pd.read_csv(input_csv, header=0, index_col=0, parse_dates=True)
-    ## STATISTICS BY AG YEAR
-    df16 = merged_csv.loc[(merged_csv['YR'] == 2016)] # subset for each ag year 
-    df17 = merged_csv.loc[(merged_csv['YR'] == 2017)]
-    df18 = merged_csv.loc[(merged_csv['YR'] == 2018)] 
-    df19 = merged_csv.loc[(merged_csv['YR'] == 2019)]
-    mean16 = df16.groupby("Date")["ATdiff"].mean().to_frame().reset_index()  # mean as dataframe
-    stDev16 = df16.groupby("Date")["ATdiff"].std().to_frame().reset_index() # standard deviation as dataframe
-    mean17 = df17.groupby("Date")["ATdiff"].mean().to_frame().reset_index()
-    stDev17 = df17.groupby("Date")["ATdiff"].std().to_frame().reset_index()
-    mean18 = df18.groupby("Date")["ATdiff"].mean().to_frame().reset_index()
-    stDev18 = df18.groupby("Date")["ATdiff"].std().to_frame().reset_index()
-    mean19 = df19.groupby("Date")["ATdiff"].mean().to_frame().reset_index()
-    stDev19 = df19.groupby("Date")["ATdiff"].std().to_frame().reset_index()
-    plot16 = df16.loc[df16['FieldID'] == plotID]
-    plot17 = df17.loc[df17['FieldID'] == plotID]
-    plot18 = df18.loc[df18['FieldID'] == plotID]
-    plot19 = df19.loc[df19['FieldID'] == plotID]
-     # seasonal stats for threshold grouping 
-    df16.loc[(df16['Date'] >= "2016-05-01") & (df16["Date"] <= "2016-10-31"), 'Season'] = "main crop"
-    df16.loc[(df16['Date'] >= "2016-11-01") & (df16["Date"] <= "2017-01-31"), 'Season'] = "COVER CROP"
-    df16.loc[(df16['Date'] >= "2017-02-01") & (df16["Date"] <= "2017-04-31"), 'Season'] = "CROP RESIDUE"
-    df17.loc[(df17['Date'] >= "2017-05-01") & (df17["Date"] <= "2017-10-31"), 'Season'] = "main crop"
-    df17.loc[(df17['Date'] >= "2017-11-01") & (df17["Date"] <= "2018-01-31"), 'Season'] = "COVER CROP"
-    df17.loc[(df17['Date'] >= "2018-02-01") & (df17["Date"] <= "2018-04-31"), 'Season'] = "CROP RESIDUE"
-    df18.loc[(df18['Date'] >= "2018-05-01") & (df18["Date"] <= "2018-10-31"), 'Season'] = "main crop"
-    df18.loc[(df18['Date'] >= "2018-11-01") & (df18["Date"] <= "2019-01-31"), 'Season'] = "COVER CROP"
-    df18.loc[(df18['Date'] >= "2019-02-01") & (df18["Date"] <= "2019-04-31"), 'Season'] = "CROP RESIDUE"
-    df19.loc[(df19['Date'] >= "2019-05-01") & (df19["Date"] <= "2019-10-31"), 'Season'] = "main crop"
-    df19.loc[(df19['Date'] >= "2019-11-01") & (df19["Date"] <= "2020-01-31"), 'Season'] = "COVER CROP"
-    df19.loc[(df19['Date'] >= "2020-02-01") & (df19["Date"] <= "2020-04-31"), 'Season'] = "CROP RESIDUE"
-
-    # merge DF back together
-    all_years = [df16, df17, df18, df19]
-    all_years_merged = pd.DataFrame()
-    for i in all_years:
-        all_years_merged = pd.concat([all_years_merged, i])
-    date_u =  all_years_merged.groupby(["Date"])["ATdiff"].mean().to_frame().reset_index()
-    date_std =  all_years_merged.groupby(["Date"])["ATdiff"].std().to_frame().reset_index()
-    seasonal_std = all_years_merged.groupby(["YR", "Season"])["ATdiff"].std().to_frame().reset_index()
-    seasonal_u = all_years_merged.groupby(["YR", "Season"])["ATdiff"].mean().to_frame().reset_index()
-
-    all_years_merged1 = pd.merge(all_years_merged, date_u, on=["Date"])
-    all_years_stat = pd.merge(all_years_merged1, date_std, on=["Date"])
-    all_years_stat.rename(columns = {'FieldID':'FieldID', 'Date':'Date','ATdiff_x':'AT_VIdiff', 'YR':'YR','Season':'Season', 'ATdiff_y':'DATEmean','ATdiff':'DATEstd'}, inplace = True)
-    all_years_stat = pd.merge(all_years_stat, seasonal_u, on=(["YR", "Season"]))
-    all_years_stats = pd.merge(all_years_stat, seasonal_std, on=(["YR", "Season"]))
-    all_years_stats.rename(columns = {'FieldID':'FieldID', 'Date':'Date','AT_VIdiff':'AT_VIdiff', 'YR':'AgYR','Season':'SZNwindow', 'DATEmean':'DATEmean','DATEstd':'DATEstd', 'ATdiff_x':'SZNmean','ATdiff_y':'SZNstd'}, inplace = True)
-    all_years_stats['Group'] = 'main crop'
-    all_years_stats.loc[(all_years_stats["AT_VIdiff"] <= (all_years_stats['DATEmean']-all_years_stats['DATEstd'])), 'Group'] = "4: (T>A) less than MEAN-1SD"
-    all_years_stats.loc[(all_years_stats["AT_VIdiff"] >= (all_years_stats['DATEmean']-all_years_stats['DATEstd'])) & (all_years_stats["AT_VIdiff"] <= 0), 'Group'] = "3: (t>a) btwn 0 and MEAN-1SD"
-    all_years_stats.loc[(all_years_stats["AT_VIdiff"] <= (all_years_stats['DATEmean']+all_years_stats['DATEstd'])) & (all_years_stats["AT_VIdiff"] >= 0), 'Group'] = "2: (a>t) btwn 0 and MEAN+1SD"
-    all_years_stats.loc[(all_years_stats["AT_VIdiff"] >= (all_years_stats['DATEmean']+all_years_stats['DATEstd'])), 'Group'] = "1: (A>T) more than MEAN+1SD"
-    # count number in each category by YEAR and SEASON 
-    
-    if output_csv==True:
-        out_csv_path = input_csv[:-4] + "_stats.csv"
-        all_years_stats.to_csv(out_csv_path)
-    
-    if plot==True:
-        full_fig = go.Figure()
-        upperB16=mean16["ATdiff"]+stDev16["ATdiff"]
-        lowerB16=mean16["ATdiff"]-stDev16["ATdiff"]
-
-        upperB17=mean17["ATdiff"]+stDev17["ATdiff"]
-        lowerB17=mean17["ATdiff"]-stDev17["ATdiff"]
-
-        upperB18=mean18["ATdiff"]+stDev18["ATdiff"]
-        lowerB18=mean18["ATdiff"]-stDev18["ATdiff"]
         
-        upperB19=mean19["ATdiff"]+stDev19["ATdiff"]
-        lowerB19=mean19["ATdiff"]-stDev19["ATdiff"]
         
-        # plot user input field
-        full_fig.add_trace(go.Scatter(x=plot16["Date"], y=plot16["ATdiff"], mode='lines', line=dict(color="rgb(0,0,0)",width =3.0), name=str(plotID) + " 2016 A-T diff"))
-        full_fig.add_trace(go.Scatter(x=plot17["Date"], y=plot17["ATdiff"], mode='lines', line=dict(color="rgb(0,0,0)",width =3.0), name=str(plotID) + " 2017 A-T diff"))
-        full_fig.add_trace(go.Scatter(x=plot18["Date"], y=plot18["ATdiff"], mode='lines', line=dict(color="rgb(0,0,0)",width =3.0), name=str(plotID) + " 2018 A-T diff"))
-        full_fig.add_trace(go.Scatter(x=plot19["Date"], y=plot19["ATdiff"], mode='lines', line=dict(color="rgb(0,0,0)",width =3.0), name=str(plotID) + " 2019 A-T diff"))
-        # add Y16 mean and SD 
-        full_fig.add_trace(go.Scatter(x=mean19["Date"], y=upperB19, mode='lines', line=dict(color=px.colors.sequential.thermal[7],width =0.1),name=""))
-        full_fig.add_trace(go.Scatter(x=mean19["Date"], y=mean19["ATdiff"], mode='lines', line=dict(color=px.colors.sequential.thermal[7]),fill='tonexty', name='2019 Mean'))
-        full_fig.add_trace(go.Scatter(x=mean19["Date"], y=lowerB19, mode='lines', line=dict(color=px.colors.sequential.thermal[7],width =0.1), fill='tonexty',name='2019 SD'))        
-        full_fig.add_trace(go.Scatter(x=mean18["Date"], y=upperB18, mode='lines', line=dict(color=px.colors.sequential.thermal[6],width =0.1), name=''))
-        full_fig.add_trace(go.Scatter(x=mean18["Date"], y=mean18["ATdiff"], mode='lines', line=dict(color=px.colors.sequential.thermal[6]),fill='tonexty', name='2018 Mean'))
-        full_fig.add_trace(go.Scatter(x=mean18["Date"], y=lowerB18, mode='lines', line=dict(color=px.colors.sequential.thermal[6],width =0.1), fill='tonexty',name='2018 SD'))
-        full_fig.add_trace(go.Scatter(x=mean17["Date"], y=upperB17, mode='lines', line=dict(color=px.colors.sequential.thermal[5],width =0.1), name=''))
-        full_fig.add_trace(go.Scatter(x=mean17["Date"], y=mean17["ATdiff"], mode='lines', line=dict(color=px.colors.sequential.thermal[5]),fill='tonexty', name='2017 Mean'))
-        full_fig.add_trace(go.Scatter(x=mean17["Date"], y=lowerB17, mode='lines', line=dict(color=px.colors.sequential.thermal[5],width =0.1), fill='tonexty',name='2017 SD'))
-        full_fig.add_trace(go.Scatter(x=mean16["Date"], y=upperB16, mode='lines', line=dict(color=px.colors.sequential.thermal[4],width =0.1), name=''))
-        full_fig.add_trace(go.Scatter(x=mean16["Date"], y=mean16["ATdiff"], mode='lines', line=dict(color=px.colors.sequential.thermal[4]),fill='tonexty', name='2016 Mean'))
-        full_fig.add_trace(go.Scatter(x=mean16["Date"], y=lowerB16, mode='lines', line=dict(color=px.colors.sequential.thermal[4],width =0.1), fill='tonexty',name='2016 SD'))
+        
+        
+        
 
-        splitpath = input_csv.split('/')
-        splitfile = splitpath[-1].split('_')
-        index = splitfile[0].upper()
-        full_fig.update_layout(title_text='Mean and Standard Deviation ' + str(index) +  ' ASA-Testigo difference across all plots (every 10 days)', title_x=0.5)
-        Y_axis_limit = stDev18["ATdiff"].max()+50
-        Y_axis_min = stDev18["ATdiff"].min()-50        
-        full_fig.add_trace(go.Bar(name="CR", x=["2017-01-01", "2018-01-01", "2019-01-01", "2020-01-01"], y=[800, 800, 800, 800], marker=dict(color=px.colors.qualitative.Antique[1]), opacity= 0.3, xperiod="M3", xperiodalignment="end", xhoverformat="Q%q", hovertemplate="crop residue visibility window"))
-        full_fig.add_trace(go.Bar(name="CC", x=["2016-10-01", "2017-10-01", "2018-10-01", "2019-10-01"], y=[800, 800, 800, 800], marker=dict(color=px.colors.qualitative.Antique[6]), opacity= 0.3, xperiod="M3", xperiodalignment="end", xhoverformat="Q%q", hovertemplate="cover crop visibility window"))
-        full_fig.show()
-        
 def AT_diff_SZN_barchart(input_csv):
     all_stats = pd.read_csv(input_csv, header=0, index_col=0, parse_dates=False)
     VI_stats_count = all_stats.groupby(['AgYR', 'SZNwindow', 'Group'])['Group'].count().to_frame() # how many plots + days in each category
@@ -410,18 +304,23 @@ def AT_diff_SZN_barchart(input_csv):
     plot_list_count.columns = ['PLOTcount']
     plot_list_count.reset_index(inplace=True)
     plot_list_count.columns = ["AgYear", "Season", "avgATdiff", 'FieldID', 'PLOTcount']
-    plot_list_count['FieldID'] = plot_list_count['FieldID'] # + str(plot_list_count['plotCOUNT'])
+    plot_list_count['FieldID'] = plot_list_count['FieldID']
     VIdff_count_list = pd.merge(plot_list_count, VI_stats_count, on=(["AgYear", "Season", "avgATdiff"]))
     VIdff_count_list_CC_CR = VIdff_count_list[VIdff_count_list['Season'] != "main crop"]
     VIdff_count_list_CC_CR["Season"] = VIdff_count_list_CC_CR['AgYear'].astype(str) +"-"+ VIdff_count_list_CC_CR["Season"]
     VIdff_count_list_CC_CR = VIdff_count_list_CC_CR.iloc[: , 1:]
     splitpath = input_csv.split('/')
     splitfile = splitpath[-1].split('_')
-    TITL = splitfile[0].upper() + " Avg seasonal ASA-Test plot differences (grouped relative to seasonal SD of all NI plots)"
+    TITL = splitfile[0].upper() + "Avg seasonal ASA-Test plot differences binned by seasonal SD away from 0"
     fig = px.bar(VIdff_count_list_CC_CR, x="Season", y="PLOTcount", title=TITL, hover_data=["FieldID","SZNcount"],  color="avgATdiff", color_discrete_sequence=[px.colors.diverging.RdYlBu[10], px.colors.diverging.RdYlBu[7], px.colors.diverging.RdYlBu[3], px.colors.diverging.RdYlBu[1]], category_orders={"avgATdiff": ["1: (A>T) avg seasonal A-T diff greater than +1SD","2: (a>t)  avg seasonal A-T diff btwn 0 and +1SD","3: (t>a) avg seasonal A-T diff btwn 0 and -1SD","4: (T>A) avg seasonal A-T diff less than -1SD"], "Season": ["2016-COVER CROP", "2016-CROP RESIDUE", "2017-COVER CROP", "2017-CROP RESIDUE", "2018-COVER CROP", "2018-CROP RESIDUE", "2019-COVER CROP", "2019-CROP RESIDUE"]})    
     fig.show()
     
-def AT_diff_barchart(input_csv):
+    
+    
+## OLD #################33
+
+
+def daily_AT_diff_barchart(input_csv):
     all_stats = pd.read_csv(input_csv, header=0, index_col=0, parse_dates=False)
     VI_stats_count = all_stats.groupby(['AgYR', 'SZNwindow', 'Group'])['Group'].count().to_frame() # how many plots + days in each category
     VI_stats_count.columns = ["SZNcount"]
@@ -440,12 +339,28 @@ def AT_diff_barchart(input_csv):
     splitfile = splitpath[-1].split('_')
     TITL = splitfile[0].upper() + " ASA/Test plot differences (compared to 10-day mean & binned within CC/CR window)"
     fig = px.bar(VIdff_count_list_CC_CR, x="Season", y="PLOTcount", title=TITL, hover_data=["FieldID","PLOTcount","SZNcount"],  color="ATdiff", color_discrete_sequence=[px.colors.diverging.RdYlBu[10],px.colors.diverging.RdYlBu[7], px.colors.diverging.RdYlBu[3], px.colors.diverging.RdYlBu[1]])
-    fig.show()
+    fig.show()  
     
-    
-    
-    
-    
+        
+def all_temporal_profiles(grid, index_list):
+    for i in index_list:
+        input_csv = "time_series/NI/" + grid + "_" + i + "_TimeSeries.csv"
+        df = pd.read_csv(input_csv, header=0, index_col=0, parse_dates=True)
+        Y_axis_limit = df["Value"].max()+50
+        Y_axis_min = df["Value"].min()-50
+        fig = px.line(df, x='Date', y='Value', title= i.upper() + ' Time Series (for plots in grid ' + grid + ")", 
+                      color='FieldID', 
+                      color_discrete_sequence=px.colors.qualitative.Dark2, # Bold, Vivid, Dark2, Pastel
+                      line_dash='Parcela')
+        fig.update_layout(xaxis_title='Date', yaxis_title='VI Value')
+        fig.update_xaxes(rangeslider_visible=True, 
+                         rangeselector=dict(buttons=list([dict(count=6, label="6m", step="month", stepmode="backward"),
+                                                          dict(count=1, label="1y", step="year", stepmode="backward"), 
+                                                          dict(count=2, label="2y", step="year", stepmode="backward"), 
+                                                          dict(step="all")]) ))
+        fig.add_trace(go.Bar(name="CC", x=["2016-12-01", "2017-12-01", "2018-12-01", "2019-12-01"], y=[Y_axis_limit, Y_axis_limit, Y_axis_limit, Y_axis_limit], marker=dict(color=px.colors.qualitative.Antique[6]), opacity= 0.3, xperiod="M1", xperiodalignment="middle", xhoverformat="Q%q", hovertemplate="cover crop visibility window"))
+        fig.add_trace(go.Bar(name="CR", x=["2017-03-01", "2018-03-01", "2019-03-01", "2020-03-01"], y=[Y_axis_limit, Y_axis_limit, Y_axis_limit, Y_axis_limit], marker=dict(color=px.colors.qualitative.Antique[1]), opacity= 0.3, xperiod="M1", xperiodalignment="middle", xhoverformat="Q%q", hovertemplate="crop residue visibility window"))
+        fig.show()
     
     
     
