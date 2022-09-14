@@ -127,17 +127,17 @@ def display_plots(grid, index_list, practicedb=True):
         grid_practice_df = practices_df.loc[practices_df['Grid'] == str(grid)[2:]]
         
         if str(grid)[2:] == "2387":
-            grid_practice_df.loc[len(grid_practice_df.index)] = ["NI_258", "2018", "1.Postrera", "ASA", "None", "maíz-frijol-canavalia", "Si", "Si", "Si", "Si", "2387"] 
-            grid_practice_df.loc[len(grid_practice_df.index)] = ["NI_258", "2018", "1.Postrera", "Testigo", "None", "maíz-frijol-canavalia", "Si", "Si", "Si", "Si", "2387"] 
-            grid_practice_df.loc[len(grid_practice_df.index)] = ["NI_248", "2018", "1.Postrera", "ASA", "None", "maíz-frijol-canavalia", "Si", "Si", "Si", "Si", "2387"] 
-            grid_practice_df.loc[len(grid_practice_df.index)] = ["NI_248", "2018", "1.Postrera", "Testigo", "None", "maíz-frijol-canavalia", "Si", "Si", "Si", "Si", "2387"] 
+            grid_practice_df.loc[len(grid_practice_df.index)] = ["NI_258", "2018", "1.Postrera", "ASA", "NA", "NA", "NA", "NA", "NA", "NA", "2387"] 
+            grid_practice_df.loc[len(grid_practice_df.index)] = ["NI_258", "2018", "1.Postrera", "Testigo", "NA", "NA", "NA", "NA", "NA", "NA", "2387"] 
+            grid_practice_df.loc[len(grid_practice_df.index)] = ["NI_248", "2018", "1.Postrera", "ASA", "NA", "NA", "NA", "NA", "NA", "NA", "2387"] 
+            grid_practice_df.loc[len(grid_practice_df.index)] = ["NI_248", "2018", "1.Postrera", "Testigo", "NA", "NA", "NA", "NA", "NA", "NA", "2387"] 
             practices = pd.pivot(grid_practice_df, index=['ID_Prod','Parcela', 'Nom.Cob'], columns=['Temporada','Ano'], values=['Cultivo'])
             cols = practices.columns.tolist()
             practice = practices[[cols[1], cols[0], cols[3], cols[2], cols[4], cols[7], cols[5], cols[6]]]
             display(practice)
         elif str(grid)[2:] == "2550":
-            grid_practice_df.loc[len(grid_practice_df.index)] = ["NI_581", "2018", "1.Postrera", "Testigo", "None", "maíz-frijol-canavalia", "Si", "Si", "Si", "Si", "2550"] 
-            grid_practice_df.loc[len(grid_practice_df.index)] = ["NI_581", "2018", "1.Postrera", "ASA", "None", "maíz-frijol-canavalia", "Si", "Si", "Si", "Si", "2550"] 
+            grid_practice_df.loc[len(grid_practice_df.index)] = ["NI_581", "2018", "1.Postrera", "Testigo", "NA", "NA", "NA", "NA", "NA", "NA", "2550"] 
+            grid_practice_df.loc[len(grid_practice_df.index)] = ["NI_581", "2018", "1.Postrera", "ASA", "NA", "NA", "NA", "NA", "NA", "NA", "2550"] 
             practices = pd.pivot(grid_practice_df, index=['ID_Prod','Parcela', 'Nom.Cob'], columns=['Temporada','Ano'], values=['Cultivo'])
             cols = practices.columns.tolist()
             practice = practices[[cols[1], cols[0], cols[3], cols[2], cols[4], cols[7], cols[6], cols[5]]]
@@ -224,7 +224,7 @@ def AT_stats(input_csv, plotID, output_csv=False, seasonal_csv=False, plot=True)
     seasonal_std.rename(columns = {'YR':'YR','Season':'Season', 'ATdiff':'SznStd'}, inplace = True)
     seasonal_u = all_years_merged.groupby(["YR", "Season"])["ATdiff"].mean().to_frame().reset_index()
     plot_season_mean = all_years_merged.groupby(["FieldID", "YR", "Season"])["ATdiff"].mean().to_frame().reset_index()
-    plot_season_mean.rename(columns = {'FieldID':'FieldID', 'YR':'YR','Season':'Season', 'ATdiff':'plotSZNmean'}, inplace = True)
+    plot_season_mean.rename(columns = {'FieldID':'FieldID', 'YR':'YR','Season':'Season', 'ATdiff':'FieldSeasonMean'}, inplace = True)
 
     all_years_merged1 = pd.merge(all_years_merged, date_u, on=["Date"])
     all_years_stat = pd.merge(all_years_merged1, date_std, on=["Date"])
@@ -239,12 +239,12 @@ def AT_stats(input_csv, plotID, output_csv=False, seasonal_csv=False, plot=True)
     all_years_seasons_stats.loc[(all_years_seasons_stats["AT_VIdiff"] <= (all_years_seasons_stats['DATEmean']+all_years_seasons_stats['DATEstd'])) & (all_years_seasons_stats["AT_VIdiff"] >= 0), 'Group'] = "2: (a>t) btwn 0 and MEAN+1SD"
     all_years_seasons_stats.loc[(all_years_seasons_stats["AT_VIdiff"] >= (all_years_seasons_stats['DATEmean']+all_years_seasons_stats['DATEstd'])), 'Group'] = "1: (A>T) more than MEAN+1SD"   
     # mean / sd by season 
-    szn_stats = all_years_seasons_stats.loc[:, all_years_seasons_stats.columns.isin(['FieldID', 'SZNwindow', 'SznStd', 'plotSZNmean'])].drop_duplicates()   
+    szn_stats = all_years_seasons_stats.loc[:, all_years_seasons_stats.columns.isin(['FieldID', 'SZNwindow', 'SznStd', 'FieldSeasonMean'])].drop_duplicates()   
     szn_stats['Group'] = 'main crop'
-    szn_stats.loc[(szn_stats["plotSZNmean"] <= (0 - szn_stats['SznStd'])), 'Group'] = "4: (T>A) avg seasonal A-T diff less than -1SD"
-    szn_stats.loc[(szn_stats["plotSZNmean"] >= (-1*szn_stats['SznStd'])) & (szn_stats["plotSZNmean"] <= 0), 'Group'] = "3: (t>a) avg seasonal A-T diff btwn 0 and -1SD"
-    szn_stats.loc[(szn_stats["plotSZNmean"] <= (1*szn_stats['SznStd'])) & (szn_stats["plotSZNmean"] >= 0), 'Group'] = "2: (a>t)  avg seasonal A-T diff btwn 0 and +1SD"
-    szn_stats.loc[(szn_stats["plotSZNmean"] >= (0 + szn_stats['SznStd'])), 'Group'] = "1: (A>T) avg seasonal A-T diff greater than +1SD"
+    szn_stats.loc[(szn_stats["FieldSeasonMean"] <= (0 - szn_stats['SznStd'])), 'Group'] = "4: (T>A) avg seasonal A-T diff less than -1SD"
+    szn_stats.loc[(szn_stats["FieldSeasonMean"] >= (-1*szn_stats['SznStd'])) & (szn_stats["FieldSeasonMean"] <= 0), 'Group'] = "3: (t>a) avg seasonal A-T diff btwn 0 and -1SD"
+    szn_stats.loc[(szn_stats["FieldSeasonMean"] <= (1*szn_stats['SznStd'])) & (szn_stats["FieldSeasonMean"] >= 0), 'Group'] = "2: (a>t)  avg seasonal A-T diff btwn 0 and +1SD"
+    szn_stats.loc[(szn_stats["FieldSeasonMean"] >= (0 + szn_stats['SznStd'])), 'Group'] = "1: (A>T) avg seasonal A-T diff greater than +1SD"
     
     if output_csv==True:
         out_csv_path = input_csv[:-4] + "_stats.csv"
@@ -305,9 +305,9 @@ def AT_stats(input_csv, plotID, output_csv=False, seasonal_csv=False, plot=True)
 def AT_diff_SZN_barchart(input_csv):
     all_stats = pd.read_csv(input_csv, header=0, index_col=0, parse_dates=False)
     VI_stats_count = all_stats.groupby(['AgYR', 'SZNwindow', 'Group'])['Group'].count().to_frame() # how many plots + days in each category
-    VI_stats_count.columns = ["SZNcount"]
+    VI_stats_count.columns = ["SeasonCount"]
     VI_stats_count.reset_index(inplace=True)
-    VI_stats_count.columns = ["AgYear", "Season", "avgATdiff", 'SZNcount']
+    VI_stats_count.columns = ["AgYear", "Season", "avgATdiff", 'SeasonCount']
     plot_list_count = all_stats.groupby([ 'AgYR', 'SZNwindow','Group'])['FieldID'].value_counts().to_frame() #.to_dict() #number of times a plot shows up in a seasonal window
     plot_list_count.columns = ['PLOTcount']
     plot_list_count.reset_index(inplace=True)
@@ -320,12 +320,12 @@ def AT_diff_SZN_barchart(input_csv):
     splitpath = input_csv.split('/')
     splitfile = splitpath[-1].split('_')
     TITL = splitfile[0].upper() + " Avg seasonal ASA-Test plot differences binned by seasonal SD away from 0"
-    fig = px.bar(VIdff_count_list_CC_CR, x="Season", y="PLOTcount", title=TITL, hover_data=["FieldID","SZNcount"],  color="avgATdiff", color_discrete_sequence=[px.colors.diverging.RdYlBu[10], px.colors.diverging.RdYlBu[7], px.colors.diverging.RdYlBu[3], px.colors.diverging.RdYlBu[1]], category_orders={"avgATdiff": ["1: (A>T) avg seasonal A-T diff greater than +1SD","2: (a>t)  avg seasonal A-T diff btwn 0 and +1SD","3: (t>a) avg seasonal A-T diff btwn 0 and -1SD","4: (T>A) avg seasonal A-T diff less than -1SD"], "Season": ["2016-COVER CROP", "2016-CROP RESIDUE", "2017-COVER CROP", "2017-CROP RESIDUE", "2018-COVER CROP", "2018-CROP RESIDUE", "2019-COVER CROP", "2019-CROP RESIDUE"]})    
+    fig = px.bar(VIdff_count_list_CC_CR, x="Season", y="PLOTcount", title=TITL, hover_data=["FieldID","SeasonCount"],  color="avgATdiff", color_discrete_sequence=[px.colors.diverging.RdYlBu[10], px.colors.diverging.RdYlBu[7], px.colors.diverging.RdYlBu[3], px.colors.diverging.RdYlBu[1]], category_orders={"avgATdiff": ["1: (A>T) avg seasonal A-T diff greater than +1SD","2: (a>t)  avg seasonal A-T diff btwn 0 and +1SD","3: (t>a) avg seasonal A-T diff btwn 0 and -1SD","4: (T>A) avg seasonal A-T diff less than -1SD"], "Season": ["2016-COVER CROP", "2016-CROP RESIDUE", "2017-COVER CROP", "2017-CROP RESIDUE", "2018-COVER CROP", "2018-CROP RESIDUE", "2019-COVER CROP", "2019-CROP RESIDUE"]})    
     fig.show()
     
     
     
-## OLD #################33
+## OLD #################
 
 
 def daily_AT_diff_barchart(input_csv):
