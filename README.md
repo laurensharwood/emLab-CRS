@@ -10,7 +10,7 @@ https://mybinder.org/v2/gh/laurensharwood/CRS/master?labpath=CRS_report.ipynb
 - Limited to indices using wavelengths/bands covered by Sentinel AND Landsat (can't use Sentinel's red-edge bands).  
 
 ## <b>Cover crops:</b> identify CC on ASA plots (with standing CR) from Test plots without CC (with grazed CR)  
-- <b>Temporal window:</b> NOV to FEB - after postrera harvest, CC is planted and dies off by February in dry years (can last as long as May?)  
+- <b>Temporal window:</b> NOV to FEB - after postrera harvest, CC is planted and dies off by February in dry years (can last as long as May)  
 - <b>Spectral window:</b> choose bands-> indices measuring green/live/photosynthetically active vegetation vs brown/dead/non-photosynthetically active vegetation  
 1) <b>Enhanced Vegetation Index 2 (EVI2)</b> = 2.5 * ( NIR - RED) / ( NIR + (2.4 * RED + 1.0 )    
 2) <b>Green-Chlorophyll Vegetation Index (GCVI)</b> = (NIR – GREEN) / (NIR + GREEN)  
