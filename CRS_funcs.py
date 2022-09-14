@@ -48,11 +48,12 @@ def temporal_profile_for_practices(grid, index_list):
         fig.show()
       
         
-def temporal_profile(grid, index_list):
+def all_temporal_profile(grid, index_list):
     for i in index_list:
-        input_csv = "time_series/" + grid + "_" + i + "_TimeSeries.csv"
+        input_csv = "time_series/NI/" + grid + "_" + i + "_TimeSeries.csv"
         df = pd.read_csv(input_csv, header=0, index_col=0, parse_dates=True)
-        Y_axis_limit = df["Value"].max()+1000
+        Y_axis_limit = df["Value"].max()+50
+        Y_axis_min = df["Value"].min()-50
         fig = px.line(df, x='Date', y='Value', title= i.upper() + ' Time Series (for plots in grid ' + grid + ")", 
                       color='FieldID', 
                       color_discrete_sequence=px.colors.qualitative.Dark2, # Bold, Vivid, Dark2, Pastel
@@ -69,7 +70,7 @@ def temporal_profile(grid, index_list):
 
 
 
-def display_plots(grid, index_list):
+def display_plots(grid_list, index_list):
     # mapping functions - Testigo dashed plot border / ASA plot solid
     def border(feature):
         if feature["properties"]["Parcela"] == "ASA":
@@ -90,70 +91,70 @@ def display_plots(grid, index_list):
                         weight=5,
                         color=colr,
                         fillColor="black")
+    for gri in grid_list:
+        with open("NI_ES_grid_centroids.geojson") as gc:
+            grid_center = json.load(gc)
+            grid_center_df = pd.json_normalize(grid_center['features'])
+            viewing_grid = grid_center_df[grid_center_df["properties.UNQ"] == int(gri[2:])]
+            center_map = viewing_grid["geometry.coordinates"].to_list()
+        with open("NI_ES_plots.geojson") as f:
+            data = json.load(f)
+        for feature in data["features"]:
+            feature["properties"]["style"] = {
+                    "weight": 1.5,
+                    "fillOpacity":0,
+                    "color":"white",
+                    "dashArray": border(feature)}        
+        with open("NI_ES_points_col.geojson") as p:
+            datap = json.load(p)
+            points_df = pd.json_normalize(datap['features'])
+            markers = points_df.apply(create_marker, axis=1)
+            layer_group = LayerGroup(layers=tuple(markers.values), name='Plot Centers')
+            marker_cluster = MarkerCluster(markers=tuple(markers.values))
 
-    with open("NI_ES_grid_centroids.geojson") as gc:
-        grid_center = json.load(gc)
-        grid_center_df = pd.json_normalize(grid_center['features'])
-        viewing_grid = grid_center_df[grid_center_df["properties.UNQ"] == int(grid[2:])]
-        center_map = viewing_grid["geometry.coordinates"].to_list()
-    with open("NI_ES_plots.geojson") as f:
-        data = json.load(f)
-    for feature in data["features"]:
-        feature["properties"]["style"] = {
-                "weight": 1.5,
-                "fillOpacity":0,
-                "color":"white",
-                "dashArray": border(feature)}        
-    with open("NI_ES_points_col.geojson") as p:
-        datap = json.load(p)
-        points_df = pd.json_normalize(datap['features'])
-        markers = points_df.apply(create_marker, axis=1)
-        layer_group = LayerGroup(layers=tuple(markers.values), name='Plot Centers')
-        marker_cluster = MarkerCluster(markers=tuple(markers.values))
-    
-    geo = GeoJSON(data=data, name='Plot Boundaries', hover_style={
-        'color': 'yellow', 'dashArray': '0', 'fillOpacity': 0.5
-    })  
-    
-    OpenTopoMap = basemap_to_tiles(basemaps.OpenTopoMap)
-    OpenTopoMap.base = True
-    OpenTopoMap.name = 'Open Topo Map'
-    
-    background = basemap_to_tiles(basemaps.Esri.WorldImagery)
-    background.base = True
-    background.name = "ESRI World Imagery"
-    
-    m = Map(layers=(OpenTopoMap, background,  ), center=(center_map[0][1], center_map[0][0]), zoom=13, scroll_wheel_zoom=True, zoom_control=False, close_popup_on_click=False)
+        geo = GeoJSON(data=data, name='Plot Boundaries', hover_style={
+            'color': 'yellow', 'dashArray': '0', 'fillOpacity': 0.5
+        })  
 
-    def update_html(feature, **kwargs):
-        html1.value = """ 
-        <h4>Producer ID: {} </h4>
-        {} Parcela """.format(feature["properties"]["ID_Prod"], feature["properties"]["Parcela"] )
-        
-    html1 = HTML("""<h4>Plot ID & Parcela </h4>Hover over a plot""")
-    html1.layout.margin = "0px 5px 5px 5px"
-    control1 = WidgetControl(widget=html1, position="topleft")
-    m.add(control1)
-    control = LayersControl(position='topright')
-    m.add_control(control)
-    m.add_control(ScaleControl(position='topright'))
-    m.add_control(ZoomControl(position='topright'))
-    m.add_layer(layer_group)
-    m.add_layer(geo)
-    geo.on_hover(update_html)
-      
-    ## display practice database
-    practices_csv = "time_series/practices_NI_ES.csv"
-    practices_df = pd.read_csv(practices_csv, dtype=str) 
-    grid_practice_df = practices_df.loc[practices_df['Grid'] == str(grid)[2:]]
-    practices = pd.pivot(grid_practice_df, index=['ID_Prod','Parcela', 'Nom.Cob'], columns=['Temporada','Ano'], values=['Cultivo'])
-    cols = practices.columns.tolist()
-    practice = practices[[cols[1], cols[0], cols[3], cols[2], cols[5], cols[4], cols[7], cols[6]]]
-    display(practice)
-    ## display time series
-    temporal_profile_for_practices(grid, index_list)
-    ## display map
-    return m
+        OpenTopoMap = basemap_to_tiles(basemaps.OpenTopoMap)
+        OpenTopoMap.base = True
+        OpenTopoMap.name = 'Open Topo Map'
+
+        background = basemap_to_tiles(basemaps.Esri.WorldImagery)
+        background.base = True
+        background.name = "ESRI World Imagery"
+
+        m = Map(layers=(OpenTopoMap, background,  ), center=(center_map[0][1], center_map[0][0]), zoom=13, scroll_wheel_zoom=True, zoom_control=False, close_popup_on_click=False)
+
+        def update_html(feature, **kwargs):
+            html1.value = """ 
+            <h4>Producer ID: {} </h4>
+            {} Parcela """.format(feature["properties"]["ID_Prod"], feature["properties"]["Parcela"] )
+
+        html1 = HTML("""<h4>Plot ID & Parcela </h4>Hover over a plot""")
+        html1.layout.margin = "0px 5px 5px 5px"
+        control1 = WidgetControl(widget=html1, position="topleft")
+        m.add(control1)
+        control = LayersControl(position='topright')
+        m.add_control(control)
+        m.add_control(ScaleControl(position='topright'))
+        m.add_control(ZoomControl(position='topright'))
+        m.add_layer(layer_group)
+        m.add_layer(geo)
+        geo.on_hover(update_html)
+
+        ## display practice database
+        practices_csv = "time_series/practices_NI_ES.csv"
+        practices_df = pd.read_csv(practices_csv, dtype=str) 
+        grid_practice_df = practices_df.loc[practices_df['Grid'] == str(gri)[2:]]
+        practices = pd.pivot(grid_practice_df, index=['ID_Prod','Parcela', 'Nom.Cob'], columns=['Temporada','Ano'], values=['Cultivo'])
+        cols = practices.columns.tolist()
+        practice = practices[[cols[1], cols[0], cols[3], cols[2], cols[5], cols[4], cols[7], cols[6]]]
+        display(practice)
+        ## display time series
+        temporal_profile_for_practices(gri, index_list)
+        ## display map
+        return m
 
 
 def aggregate_plots(input_dir, index):
@@ -353,7 +354,6 @@ def OLD_AT_stats(input_csv, plotID, output_csv=False, plot=True):
     
     if output_csv==True:
         out_csv_path = input_csv[:-4] + "_stats.csv"
-        print(out_csv_path)
         all_years_stats.to_csv(out_csv_path)
     
     if plot==True:
@@ -371,11 +371,11 @@ def OLD_AT_stats(input_csv, plotID, output_csv=False, plot=True):
         lowerB19=mean19["ATdiff"]-stDev19["ATdiff"]
         
         # plot user input field
-        full_fig.add_trace(go.Scatter(x=plot16["Date"], y=plot16["ATdiff"], mode='lines', line=dict(color=px.colors.sequential.thermal[1],width =3.0), name=str(plotID) + " 2016 A-T diff"))
-        full_fig.add_trace(go.Scatter(x=plot17["Date"], y=plot17["ATdiff"], mode='lines', line=dict(color=px.colors.sequential.thermal[1],width =3.0), name=str(plotID) + " 2017 A-T diff"))
-        full_fig.add_trace(go.Scatter(x=plot18["Date"], y=plot18["ATdiff"], mode='lines', line=dict(color=px.colors.sequential.thermal[1],width =3.0), name=str(plotID) + " 2018 A-T diff"))
-        full_fig.add_trace(go.Scatter(x=plot19["Date"], y=plot19["ATdiff"], mode='lines', line=dict(color=px.colors.sequential.thermal[1],width =3.0), name=str(plotID) + " 2019 A-T diff"))
-                # add Y16 mean and SD 
+        full_fig.add_trace(go.Scatter(x=plot16["Date"], y=plot16["ATdiff"], mode='lines', line=dict(color="rgb(0,0,0)",width =3.0), name=str(plotID) + " 2016 A-T diff"))
+        full_fig.add_trace(go.Scatter(x=plot17["Date"], y=plot17["ATdiff"], mode='lines', line=dict(color="rgb(0,0,0)",width =3.0), name=str(plotID) + " 2017 A-T diff"))
+        full_fig.add_trace(go.Scatter(x=plot18["Date"], y=plot18["ATdiff"], mode='lines', line=dict(color="rgb(0,0,0)",width =3.0), name=str(plotID) + " 2018 A-T diff"))
+        full_fig.add_trace(go.Scatter(x=plot19["Date"], y=plot19["ATdiff"], mode='lines', line=dict(color="rgb(0,0,0)",width =3.0), name=str(plotID) + " 2019 A-T diff"))
+        # add Y16 mean and SD 
         full_fig.add_trace(go.Scatter(x=mean19["Date"], y=upperB19, mode='lines', line=dict(color=px.colors.sequential.thermal[7],width =0.1),name=""))
         full_fig.add_trace(go.Scatter(x=mean19["Date"], y=mean19["ATdiff"], mode='lines', line=dict(color=px.colors.sequential.thermal[7]),fill='tonexty', name='2019 Mean'))
         full_fig.add_trace(go.Scatter(x=mean19["Date"], y=lowerB19, mode='lines', line=dict(color=px.colors.sequential.thermal[7],width =0.1), fill='tonexty',name='2019 SD'))        
