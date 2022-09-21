@@ -147,7 +147,6 @@ def display_plots(grid, index_list, practicedb=True):
             cols = practices.columns.tolist()
             practice = practices[[cols[1], cols[0], cols[3], cols[2], cols[5], cols[4], cols[7], cols[6]]]
             display(practice)
-            print('here')
 
     if practicedb==False:
         pass
