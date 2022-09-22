@@ -10,7 +10,7 @@ https://mybinder.org/v2/gh/laurensharwood/CRS/master?labpath=CRS_report.ipynb
 - functions to run:
  1) AT_diff_barchart() -- run cell as is to see all vegetation indices. Can see individual plot IDs and which group they fall into for each critical seasonal window
  2) AT_diff_TS() -- only change FieldID above ##### line, keep quotes. 
- 3) display_plots() -- change grid number, can remove/add back vegetation indices from list. NI and ES have different options of VIs to choose from
+ 3) display_plots() -- change grid number, can remove/add back vegetation indices from list
 
 
 # 2016-2019 time series of vegetation indices to identify cover crops (CC) and crop residue (CR) on ASA plots (treatment) vs Test plots (control):  
