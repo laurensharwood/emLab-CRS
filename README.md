@@ -4,6 +4,15 @@
 
 https://mybinder.org/v2/gh/laurensharwood/CRS/master?labpath=CRS_report.ipynb
 
+- right-click link > open link in new tab (wait for notebook to load)
+- to run a cell...select cell and either (1) press Play arrow, or (2) type SHIFT+ENTER, or (3) select Run > Run Selected Cells
+- *always run first cell to import (load) functions and set the working directory (where to look for files)
+- functions to run:
+ 1) AT_diff_barchart() -- run cell as is to see all vegetation indices. Can see individual plot IDs and which group they fall into for each critical seasonal window
+ 2) AT_diff_TS() -- only change FieldID above ##### line, keep quotes. 
+ 3) display_plots() -- change grid number, can remove/add back vegetation indices from list. NI and ES have different options of VIs to choose from
+
+
 # 2016-2019 time series of vegetation indices to identify cover crops (CC) and crop residue (CR) on ASA plots (treatment) vs Test plots (control):  
 - Vegetation Indices: maximize separation of features of interest.  
 - Limited to indices using wavelengths/bands covered by Sentinel AND Landsat (can't use Sentinel's red-edge bands).  
