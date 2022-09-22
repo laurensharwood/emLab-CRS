@@ -126,7 +126,16 @@ def display_plots(grid, index_list, practicedb=True):
         practices_df = pd.read_csv(practices_csv, dtype=str) 
         grid_practice_df = practices_df.loc[practices_df['Grid'] == str(grid)[2:]]
         
-        if str(grid)[2:] == "2387":
+        if str(grid)[2:] == "1892":
+            practices = pd.pivot(grid_practice_df, index=['ID_Prod','Parcela', 'Nom.Cob'], columns=['Temporada','Ano'], values=['Cultivo'])
+            display(practices)        
+        elif str(grid)[2:] == "1972":
+            practices = pd.pivot(grid_practice_df, index=['ID_Prod','Parcela', 'Nom.Cob'], columns=['Temporada','Ano'], values=['Cultivo'])
+            display(practices)    
+        elif str(grid)[2:] == "2056":
+            practices = pd.pivot(grid_practice_df, index=['ID_Prod','Parcela', 'Nom.Cob'], columns=['Temporada','Ano'], values=['Cultivo'])
+            display(practices)    
+        elif str(grid)[2:] == "2387":
             grid_practice_df.loc[len(grid_practice_df.index)] = ["NI_258", "2018", "1.Postrera", "ASA", "NA", "NA", "NA", "NA", "NA", "NA", "2387"] 
             grid_practice_df.loc[len(grid_practice_df.index)] = ["NI_258", "2018", "1.Postrera", "Testigo", "NA", "NA", "NA", "NA", "NA", "NA", "2387"] 
             grid_practice_df.loc[len(grid_practice_df.index)] = ["NI_248", "2018", "1.Postrera", "ASA", "NA", "NA", "NA", "NA", "NA", "NA", "2387"] 
@@ -179,7 +188,7 @@ def aggregate_plots(input_dir, index):
     out_csv_path = input_dir + "ATdiffmerged/" + str(index) + "_ATdiff_merged.csv"
     return merged_csv.to_csv(out_csv_path)    
 
-def AT_stats(input_csv, plotID, output_csv=False, seasonal_csv=False, plot=True):
+def AT_diff_TS(input_csv, plotID, output_csv=False, seasonal_csv=False, plot=True):
     merged_csv = pd.read_csv(input_csv, header=0, index_col=0, parse_dates=True)
     ## STATISTICS BY AG YEAR
     df16 = merged_csv.loc[(merged_csv['YR'] == 2016)] # subset for each ag year 
@@ -301,7 +310,7 @@ def AT_stats(input_csv, plotID, output_csv=False, seasonal_csv=False, plot=True)
         
         
 
-def AT_diff_SZN_barchart(input_csv):
+def AT_diff_barchart(input_csv):
     all_stats = pd.read_csv(input_csv, header=0, index_col=0, parse_dates=False)
     VI_stats_count = all_stats.groupby(['AgYR', 'SZNwindow', 'Group'])['Group'].count().to_frame() # how many plots + days in each category
     VI_stats_count.columns = ["SeasonCount"]
@@ -325,7 +334,28 @@ def AT_diff_SZN_barchart(input_csv):
     
     
 ## OLD #################
-
+def all_temporal_profiles(grid, index_list):
+    for i in index_list:
+        input_csv = "time_series/NI/" + grid + "_" + i + "_TimeSeries.csv"
+        df = pd.read_csv(input_csv, header=0, index_col=0, parse_dates=True)
+        Y_axis_limit = df["Value"].max()+50
+        Y_axis_min = df["Value"].min()-50
+        fig = px.line(df, x='Date', y='Value', title= i.upper() + ' Time Series (for plots in grid ' + grid + ")", 
+                      color='FieldID', 
+                      color_discrete_sequence=px.colors.qualitative.Dark2, # Bold, Vivid, Dark2, Pastel
+                      line_dash='Parcela')
+        fig.update_layout(xaxis_title='Date', yaxis_title='VI Value')
+        fig.update_xaxes(rangeslider_visible=True, 
+                         rangeselector=dict(buttons=list([dict(count=6, label="6m", step="month", stepmode="backward"),
+                                                          dict(count=1, label="1y", step="year", stepmode="backward"), 
+                                                          dict(count=2, label="2y", step="year", stepmode="backward"), 
+                                                          dict(step="all")]) ))
+        fig.add_trace(go.Bar(name="CC", x=["2016-12-01", "2017-12-01", "2018-12-01", "2019-12-01"], y=[Y_axis_limit, Y_axis_limit, Y_axis_limit, Y_axis_limit], marker=dict(color=px.colors.qualitative.Antique[6]), opacity= 0.3, xperiod="M1", xperiodalignment="middle", xhoverformat="Q%q", hovertemplate="cover crop visibility window"))
+        fig.add_trace(go.Bar(name="CR", x=["2017-03-01", "2018-03-01", "2019-03-01", "2020-03-01"], y=[Y_axis_limit, Y_axis_limit, Y_axis_limit, Y_axis_limit], marker=dict(color=px.colors.qualitative.Antique[1]), opacity= 0.3, xperiod="M1", xperiodalignment="middle", xhoverformat="Q%q", hovertemplate="crop residue visibility window"))
+        fig.show()
+    
+        
+        
 
 def daily_AT_diff_barchart(input_csv):
     all_stats = pd.read_csv(input_csv, header=0, index_col=0, parse_dates=False)
@@ -349,25 +379,7 @@ def daily_AT_diff_barchart(input_csv):
     fig.show()  
     
         
-def all_temporal_profiles(grid, index_list):
-    for i in index_list:
-        input_csv = "time_series/NI/" + grid + "_" + i + "_TimeSeries.csv"
-        df = pd.read_csv(input_csv, header=0, index_col=0, parse_dates=True)
-        Y_axis_limit = df["Value"].max()+50
-        Y_axis_min = df["Value"].min()-50
-        fig = px.line(df, x='Date', y='Value', title= i.upper() + ' Time Series (for plots in grid ' + grid + ")", 
-                      color='FieldID', 
-                      color_discrete_sequence=px.colors.qualitative.Dark2, # Bold, Vivid, Dark2, Pastel
-                      line_dash='Parcela')
-        fig.update_layout(xaxis_title='Date', yaxis_title='VI Value')
-        fig.update_xaxes(rangeslider_visible=True, 
-                         rangeselector=dict(buttons=list([dict(count=6, label="6m", step="month", stepmode="backward"),
-                                                          dict(count=1, label="1y", step="year", stepmode="backward"), 
-                                                          dict(count=2, label="2y", step="year", stepmode="backward"), 
-                                                          dict(step="all")]) ))
-        fig.add_trace(go.Bar(name="CC", x=["2016-12-01", "2017-12-01", "2018-12-01", "2019-12-01"], y=[Y_axis_limit, Y_axis_limit, Y_axis_limit, Y_axis_limit], marker=dict(color=px.colors.qualitative.Antique[6]), opacity= 0.3, xperiod="M1", xperiodalignment="middle", xhoverformat="Q%q", hovertemplate="cover crop visibility window"))
-        fig.add_trace(go.Bar(name="CR", x=["2017-03-01", "2018-03-01", "2019-03-01", "2020-03-01"], y=[Y_axis_limit, Y_axis_limit, Y_axis_limit, Y_axis_limit], marker=dict(color=px.colors.qualitative.Antique[1]), opacity= 0.3, xperiod="M1", xperiodalignment="middle", xhoverformat="Q%q", hovertemplate="crop residue visibility window"))
-        fig.show()
+
     
     
     
