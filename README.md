@@ -3,7 +3,7 @@
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/laurensharwood/CRS/master?labpath=CRS_report.ipynb)
 
 
-Water-smart Ag Report: Plotly/Dash <a href="[https://www.github.com/laurensharwood/CEL_CropSeg/](https://mybinder.org/v2/gh/laurensharwood/CRS/master?labpath=CRS_report.ipynb)" target="_blank">Binder</a>
+Water-smart Ag Report: Plotly/Dash <a href="https://mybinder.org/v2/gh/laurensharwood/CRS/master?labpath=CRS_report.ipynb" target="_blank">Binder</a>
 
 - right-click link > open link in new tab (wait ~10 min for notebook to load while conda virtual env is built)
 - to run a cell...select cell and either (1) press Play arrow, or (2) type SHIFT+ENTER, or (3) select Run > Run Selected Cells
